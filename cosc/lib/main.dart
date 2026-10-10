@@ -1,3 +1,6 @@
+/// Application entry point for the Cooperating Screen Flutter client.
+/// The bootstrap initializes local storage and the Supabase client, then wires
+/// the provider layer and route graph that power the UI.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';

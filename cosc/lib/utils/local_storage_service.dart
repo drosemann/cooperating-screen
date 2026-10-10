@@ -1,3 +1,6 @@
+/// Local persistence layer for device metadata and small application state.
+/// The service stores paired devices and runtime preferences in a lightweight
+/// on-device database so the app can restore known peers between launches.
 import 'package:hive_flutter/hive_flutter.dart';
 
 class PairedDevice {

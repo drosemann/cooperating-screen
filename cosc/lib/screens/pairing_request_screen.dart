@@ -1,3 +1,6 @@
+/// Pairing request screen that presents an incoming or outgoing handshake request.
+/// It exposes the verification state, code entry, and follow-up actions needed to
+/// accept or reject a remote device request.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/pairing_service.dart';
@@ -33,6 +36,9 @@ class _PairingRequestScreenState extends State<PairingRequestScreen> {
     super.dispose();
   }
 
+  // Starts the pairing handshake by validating the remote serial and password, and
+  // then submitting the pairing request to the backend. This is the first step in
+  // establishing a trusted device relationship before any media session is created.
   Future<void> _initiatePariring() async {
     // Validate input
     if (_remoteSerialController.text.isEmpty) {
@@ -105,6 +111,8 @@ class _PairingRequestScreenState extends State<PairingRequestScreen> {
     }
   }
 
+  // Renders the pairing form and shows validation feedback so the user can confirm
+  // the target device and password before triggering the trust request.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

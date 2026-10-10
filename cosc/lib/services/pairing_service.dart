@@ -1,3 +1,6 @@
+/// Pairing service that orchestrates the device-linking workflow.
+/// It supervises challenge generation, verification, and the storage of session
+/// information needed to establish a trusted connection.
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../utils/security_utils.dart';
 import '../utils/local_storage_service.dart';
@@ -9,7 +12,9 @@ class PairingService {
   static const Duration _pairingTimeout = Duration(seconds: 30);
   static const int _maxAttempts = 3;
 
-  /// Request pairing with a remote device
+  /// Requests a temporary trust relationship with a peer device. The method
+  /// validates the serial and password requirements, creates a pairing code, and
+  /// persists the session until the remote device completes verification.
   Future<bool> requestPairing({
     required String localDeviceSerial,
     required String remoteDeviceSerial,
@@ -71,7 +76,9 @@ class PairingService {
     }
   }
 
-  /// Confirm pairing after code verification
+  /// Confirms a pairing session only after the user enters the matching code and
+  /// the record is still within its expiration window. If verification fails, the
+  /// session remains unusable and the app does not finalize the trust relationship.
   Future<bool> confirmPairing({
     required String sessionId,
     required String confirmedPairingCode,
@@ -121,7 +128,8 @@ class PairingService {
     }
   }
 
-  /// Get active pairing sessions
+  /// Fetches the pending pairing sessions that belong to the current device so the
+  /// app can present outstanding verification workflows to the user.
   Future<List<PairingSession>> getActiveSessions(String deviceSerial) async {
     try {
       final response = await _supabase
@@ -139,7 +147,8 @@ class PairingService {
     }
   }
 
-  /// Cancel a pairing session
+  /// Cancels an outstanding pairing request and removes any local cache tied to it,
+  /// preventing stale or abandoned verification flows from lingering in storage.
   Future<bool> cancelPairing(String sessionId) async {
     try {
       await _supabase
@@ -155,7 +164,8 @@ class PairingService {
     }
   }
 
-  /// Unpair a device
+  /// Removes a trusted device from local storage and clears the residual pairing
+  /// state used by the app to guide future connection attempts.
   Future<bool> unpairDevice(String pairedDeviceId) async {
     try {
       // Remove from local storage
@@ -169,7 +179,8 @@ class PairingService {
     }
   }
 
-  /// Get pairing history
+  /// Returns the pairing history for a device in reverse chronological order so
+  /// the UI can show a timeline of successful and failed trust handshakes.
   Future<List<Map<String, dynamic>>> getPairingHistory(
     String deviceSerial,
   ) async {

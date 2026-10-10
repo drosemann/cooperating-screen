@@ -1,3 +1,6 @@
+/// Screen-capture integration used when a device needs to share its display.
+/// It is responsible for starting and stopping the capture pipeline and reporting
+/// any platform-level limitations to the rest of the app.
 import 'dart:io';
 import 'package:flutter/services.dart';
 

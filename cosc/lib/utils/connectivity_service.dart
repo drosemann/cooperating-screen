@@ -1,3 +1,6 @@
+/// Network connectivity helper for the mobile client.
+/// It reports whether the device is online and which transport is currently
+/// available so the app can adjust call behavior and failover logic.
 import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ConnectivityService {

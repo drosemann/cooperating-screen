@@ -1,3 +1,6 @@
+// Android entry point for the screen-capture bridge used by Flutter.
+// The activity requests media projection permission and exposes the native
+// capture API to the rest of the application through a method channel.
 package com.cooperatingscreen.app
 
 import android.app.Activity

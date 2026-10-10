@@ -1,3 +1,6 @@
+/// Device fingerprinting service used to identify peers consistently.
+/// The fingerprint combines hardware- and runtime-specific signals so the app can
+/// differentiate devices while preserving privacy boundaries.
 import 'dart:io';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:crypto/crypto.dart';

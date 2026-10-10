@@ -1,3 +1,6 @@
+/// Confirmation step of the pairing workflow.
+/// This screen helps the user verify that the remote device is the intended peer
+/// before the session becomes active and the two endpoints are linked.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/pairing_service.dart';
@@ -26,6 +29,8 @@ class _PairingConfirmationScreenState extends State<PairingConfirmationScreen> {
     _startCountdown();
   }
 
+  // Starts the countdown that limits how long the pairing code remains valid. This
+  // prevents stale or abandoned trust requests from lingering indefinitely.
   void _startCountdown() {
     Future.doWhile(() async {
       await Future.delayed(const Duration(seconds: 1));
@@ -65,6 +70,9 @@ class _PairingConfirmationScreenState extends State<PairingConfirmationScreen> {
     );
   }
 
+  // Verifies the pairing code entered by the user against the active session and
+  // only finalizes the trust relationship once the code is valid and still within
+  // the expiration window.
   Future<void> _confirmPairing() async {
     if (_codeController.text.isEmpty || _codeController.text.length != 6) {
       setState(() => _errorMessage = 'Please enter a valid 6-digit code');

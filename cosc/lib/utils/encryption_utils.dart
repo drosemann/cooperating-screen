@@ -1,3 +1,6 @@
+/// Encryption and key-derivation helpers used to protect sensitive payloads.
+/// The utilities wrap the cryptographic steps required to secure pairing data,
+/// session metadata, and remote-transfer content before it crosses the network.
 import 'package:crypto/crypto.dart';
 import 'dart:typed_data';
 import 'dart:convert';

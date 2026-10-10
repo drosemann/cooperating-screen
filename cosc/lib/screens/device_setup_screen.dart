@@ -1,3 +1,6 @@
+/// First-run setup screen for registering and configuring the current device.
+/// The UI collects essential metadata and routes the user into the pairing flow
+/// once the local device is ready to connect to peers.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/supabase_service.dart';
@@ -15,6 +18,8 @@ class _DeviceSetupScreenState extends State<DeviceSetupScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  // The setup flow initializes the local form state before the user enters the
+  // registration details needed to create the device record in the backend.
   @override
   void initState() {
     super.initState();
@@ -27,6 +32,9 @@ class _DeviceSetupScreenState extends State<DeviceSetupScreen> {
     super.dispose();
   }
 
+  // Registers the current device with the backend after validating the form fields.
+  // If the operation succeeds, the app moves straight to the main dashboard and the
+  // user can immediately start pairing or creating rooms.
   Future<void> _registerDevice() async {
     if (_deviceNameController.text.isEmpty) {
       setState(() => _errorMessage = 'Please enter a device name');
@@ -57,6 +65,8 @@ class _DeviceSetupScreenState extends State<DeviceSetupScreen> {
     }
   }
 
+  // Renders the onboarding UI: a welcome header, device naming inputs, and a
+  // registration action that transitions the app into its paired-device workflow.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

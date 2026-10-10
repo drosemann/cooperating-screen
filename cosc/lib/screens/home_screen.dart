@@ -1,3 +1,6 @@
+/// Main dashboard screen for the cooperating-screen client.
+/// It is the landing surface after registration and centralizes access to room
+/// creation, pairing requests, device status, and app settings.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/supabase_service.dart';
@@ -10,17 +13,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // The dashboard starts by loading the device metadata that is displayed in the
+  // "This Device" card. This keeps the home screen consistent with the current
+  // registration state without forcing the user to manually re-enter details.
   @override
   void initState() {
     super.initState();
     _loadDeviceInfo();
   }
 
+  // Retrieves the current device identity from the Supabase-backed service so the
+  // screen can render the active serial and friendly name in the interface.
   Future<void> _loadDeviceInfo() async {
     final supabaseService = context.read<SupabaseService>();
     // Device info will be displayed from storage
   }
 
+  // Builds the main dashboard layout and consolidates the primary actions users can
+  // take from the home view: manage pairings, open rooms, and navigate to settings.
   @override
   Widget build(BuildContext context) {
     final supabaseService = context.read<SupabaseService>();

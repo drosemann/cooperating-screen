@@ -1,3 +1,6 @@
+// Generated Flutter plugin registrar for the iOS screen-capture bridge.
+// It registers platform implementations so the Flutter app can access native
+// capture and display features through the method channel contract.
 import UIKit
 import Flutter
 import ReplayKit

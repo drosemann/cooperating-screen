@@ -1,3 +1,6 @@
+/// Core WebRTC service abstraction used to negotiate streams and media channels.
+/// The service hides transport details from the screens and exposes the calls
+/// needed for offer/answer exchange and candidate propagation.
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'dart:convert';
 import 'signaling_service.dart';
@@ -22,7 +25,9 @@ class WebRTCService {
     'stun:stun4.l.google.com:19302',
   ];
 
-  // Connection state callbacks
+  // Connection state callbacks used by the UI layer to react to network quality,
+  // ICE stability, and peer availability without directly coupling screens to the
+  // SDP negotiation implementation.
   Function(RTCPeerConnectionState)? onConnectionStateChange;
   Function(RTCIceConnectionState)? onIceConnectionStateChange;
   Function(RTCSignalingState)? onSignalingStateChange;
@@ -43,6 +48,9 @@ class WebRTCService {
        _targetDevice = targetDevice,
        _roomCode = roomCode;
 
+  /// Configures the service with the room callbacks used for offer, answer, and
+  /// candidate exchange. This bootstrapping step ensures the connection manager is
+  /// ready to consume room-level signaling updates as soon as the call begins.
   Future<bool> initialize({bool useAudio = true, bool useVideo = true}) async {
     if (_roomService != null) {
       _roomService!.onOfferReceived = (data) => onRoomOfferReceived?.call(data);
@@ -52,7 +60,8 @@ class WebRTCService {
     return true;
   }
 
-  /// Initialize WebRTC peer connection
+  /// Creates the actual peer connection and attaches the local media stream so the
+  /// app can negotiate a direct browser-to-browser or native-to-native call path.
   Future<bool> initialize({
     bool useAudio = true,
     bool useVideo = true,
@@ -132,7 +141,8 @@ class WebRTCService {
     }).toList();
   }
 
-  /// Setup peer connection event handlers
+  /// Hooks the peer connection lifecycle callbacks so the service can react to
+  /// stream arrival, connectivity changes, and ICE gathering progress.
   void _setupPeerConnectionHandlers() {
     _peerConnection.onConnectionState = (RTCPeerConnectionState state) {
       print('Peer connection state: $state');
@@ -186,7 +196,9 @@ class WebRTCService {
     };
   }
 
-  /// Create WebRTC offer
+  /// Generates and publishes an SDP offer for a specific peer. This is the first
+  /// step in the WebRTC negotiation process and is followed by an answer from the
+  /// remote device.
   Future<bool> createOffer(String targetDevice) async {
     try {
       final offer = await _peerConnection.createOffer({});
@@ -207,7 +219,9 @@ class WebRTCService {
     }
   }
 
-  /// Create WebRTC answer
+  /// Responds to an incoming offer by creating and sending a matching SDP answer.
+  /// The answer finalizes the offer/answer exchange and allows the connection to
+  /// proceed to ICE candidate discovery.
   Future<bool> createAnswer(String targetDevice) async {
     try {
       final answer = await _peerConnection.createAnswer({});
@@ -228,7 +242,8 @@ class WebRTCService {
     }
   }
 
-  /// Handle remote offer
+  /// Registers a remote offer on the peer connection so the app can continue the
+  /// negotiation and prepare to send a local answer.
   Future<bool> handleOffer(String offerSdp) async {
     try {
       final offer = RTCSessionDescription(offerSdp, 'offer');
@@ -240,7 +255,8 @@ class WebRTCService {
     }
   }
 
-  /// Handle remote answer
+  /// Applies the remote device's SDP answer so the local peer connection can mark
+  /// the negotiation as complete and proceed with candidate exchange.
   Future<bool> handleAnswer(String answerSdp) async {
     try {
       final answer = RTCSessionDescription(answerSdp, 'answer');
@@ -252,7 +268,8 @@ class WebRTCService {
     }
   }
 
-  /// Add ICE candidate
+  /// Adds a newly discovered ICE candidate to the peer connection so the call can
+  /// traverse NAT layers and complete the media path.
   Future<bool> addIceCandidate(
     String candidate,
     int? sdpMLineIndex,

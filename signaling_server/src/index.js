@@ -1,3 +1,8 @@
+/*
+ * Signaling server for the cooperating-screen application.
+ * It stores connected devices, manages room state, and relays WebRTC media
+ * negotiation traffic between peers while validating every incoming message.
+ */
 import express from 'express';
 import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
@@ -43,6 +48,9 @@ const clients = new Map(); // Map<deviceSerial, WebSocket>
 const sessionMap = new Map(); // Map<sessionId, { device1, device2 }>
 const rooms = new Map(); // Map<roomCode, room>
 
+// Every new socket connection receives its own tracking metadata so the server can
+// associate incoming messages with the originating device, enforce rate limits,
+// and clean up stale sessions when a peer disconnects unexpectedly.
 wss.on('connection', (ws, req) => {
   const connectionId = uuidv4();
   const clientIp = req.socket.remoteAddress || 'unknown';
@@ -97,6 +105,9 @@ wss.on('connection', (ws, req) => {
   });
 });
 
+// Central dispatcher for the signaling protocol. This function validates that a
+// device is registered before sensitive messages are processed and then routes the
+// payload to the matching room or peer handler.
 async function handleSignalingMessage(ws, message, setDeviceSerial, boundDeviceSerial) {
   const { type, data = {} } = message;
   if (type !== 'device_registration' && !boundDeviceSerial) {
@@ -145,6 +156,8 @@ async function handleSignalingMessage(ws, message, setDeviceSerial, boundDeviceS
   }
 }
 
+// Stores the socket on the device serial so later messages can be routed to the
+// correct connected peer without requiring repeated lookups by IP address.
 function handleDeviceRegistration(ws, data, setDeviceSerial) {
   const deviceSerial = data.device_serial || data.deviceSerial;
 
@@ -162,6 +175,9 @@ function handleDeviceRegistration(ws, data, setDeviceSerial) {
   }));
 }
 
+// Starts a pairing request by identifying the remote endpoint and sending back a
+// generated six-digit code that the receiving device can validate against the
+// initiating peer.
 function handlePairingRequest(ws, data) {
   const { target_device: targetDevice } = data;
 
@@ -187,6 +203,9 @@ function handlePairingRequest(ws, data) {
   }));
 }
 
+// Creates a room object and assigns the initiating device as the host, which
+// gives it authority to manage participants and room state until a new host is
+// promoted or the room is closed.
 function handleRoomCreate(ws, data) {
   const { device_serial: deviceSerial, room_name: roomName, max_participants: maxParticipants, is_public: isPublic } = data;
 
@@ -220,6 +239,8 @@ function handleRoomCreate(ws, data) {
   }));
 }
 
+// Adds a device to an existing room and notifies all current members so they can
+// keep their UI in sync with the active participant list.
 function handleRoomJoin(ws, data) {
   const { room_code: roomCode, device_serial: deviceSerial } = data;
 
@@ -263,6 +284,8 @@ function handleRoomJoin(ws, data) {
   });
 }
 
+// Removes a participant from a room and handles host transfer or room deletion if
+// the last member leaves, which keeps the room registry consistent over time.
 function handleRoomLeave(ws, data) {
   const { room_code: roomCode, device_serial: deviceSerial } = data;
 
@@ -302,6 +325,8 @@ function handleRoomLeave(ws, data) {
   ws.send(JSON.stringify({ type: 'room_left', data: { room_code: roomCode } }));
 }
 
+// Exposes the public room catalog so clients can discover active sessions without
+// knowing a room code ahead of time.
 function handleRoomList(ws) {
   const publicRooms = [];
 
@@ -320,6 +345,8 @@ function handleRoomList(ws) {
   ws.send(JSON.stringify({ type: 'room_list', data: { rooms: publicRooms } }));
 }
 
+// Relays a signaling payload to every other participant in a room, ensuring that
+// the message reaches peers without echoing the sender again.
 function relayToRoom(ws, roomCode, payloadType, payloadData) {
   const room = rooms.get(roomCode);
   if (!room) {
@@ -335,6 +362,8 @@ function relayToRoom(ws, roomCode, payloadType, payloadData) {
   });
 }
 
+// Sends a one-to-one message to a specific registered device and reports a clear
+// error when the peer is offline or has not completed registration yet.
 function relayToDevice(ws, targetDevice, payloadType, payloadData) {
   const targetWs = clients.get(targetDevice);
   if (!targetWs) {
@@ -345,6 +374,9 @@ function relayToDevice(ws, targetDevice, payloadType, payloadData) {
   targetWs.send(JSON.stringify({ type: payloadType, data: payloadData }));
 }
 
+// Forwards an SDP offer either to a specific peer or to all participants in the
+// current room so the WebRTC negotiation can begin without exposing direct socket
+// addresses to the application.
 function handleOffer(ws, data) {
   const { target_device: targetDevice, room_code: roomCode, sdp, device_serial: deviceSerial } = data;
 
@@ -355,6 +387,8 @@ function handleOffer(ws, data) {
   }
 }
 
+// Relays the SDP answer back along the same negotiated route used by the offer so
+// the remote peer can finish the peer-to-peer connection setup.
 function handleAnswer(ws, data) {
   const { target_device: targetDevice, room_code: roomCode, sdp, device_serial: deviceSerial } = data;
 
@@ -365,6 +399,8 @@ function handleAnswer(ws, data) {
   }
 }
 
+// Propagates ICE candidates to the remote endpoint so the WebRTC connection can
+// establish connectivity across NAT and firewall boundaries.
 function handleIceCandidate(ws, data) {
   const { target_device: targetDevice, room_code: roomCode, candidate, device_serial: deviceSerial } = data;
 
@@ -375,10 +411,14 @@ function handleIceCandidate(ws, data) {
   }
 }
 
+// Records peer connection changes for observability without altering the media
+// protocol itself.
 function handleConnectionState(data) {
   logger.info({ state: data.state, target: data.target_device }, 'Connection state update');
 }
 
+// Verifies that a message comes from the device it claims to originate from and
+// that room-scoped traffic is only emitted by authorized participants.
 function _isAuthorizedMessage(type, data, boundDeviceSerial) {
   if (type === 'device_registration') return true;
   if (!boundDeviceSerial) return false;

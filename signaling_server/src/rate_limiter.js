@@ -1,10 +1,13 @@
 /**
- * Rate Limiter for WebSocket and HTTP endpoints
- * Prevents abuse and DDoS attacks
+ * Rate Limiter for WebSocket and HTTP endpoints.
+ * This guard keeps the signaling server responsive by tracking how often a single
+ * IP address or device emits requests within a rolling time window.
  */
 
 export default class RateLimiter {
   constructor(options = {}) {
+    // Each limiter instance is configured with a fixed window and request quota,
+    // which makes abuse detection predictable and easy to tune per endpoint type.
     this.windowMs = options.windowMs || 60000; // 1 minute default
     this.maxRequests = options.maxRequests || 100; // 100 requests per minute
     this.requests = new Map();

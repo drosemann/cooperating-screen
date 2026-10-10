@@ -1,3 +1,6 @@
+/// Reusable video widgets that render local and remote media streams.
+/// They provide the visual shell for WebRTC participants and encapsulate the
+/// view logic needed for preview, portrait mode, and picture-in-picture layouts.
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 

@@ -1,3 +1,6 @@
+/// App-level configuration provider for theme, video preferences, and behavior.
+/// This state container centralizes the UI settings used by the Flutter screens
+/// so the application remains consistent across the navigation flow.
 import 'package:flutter/material.dart';
 import '../utils/local_storage_service.dart';
 

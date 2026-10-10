@@ -1,3 +1,6 @@
+/// Supabase-backed service for identity and persistence needs.
+/// It centralizes database reads and writes used to register devices, store state,
+/// and keep configuration synchronized with the hosted backend.
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:get_storage/get_storage.dart';
 import 'dart:convert';

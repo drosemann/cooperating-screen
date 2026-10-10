@@ -1,3 +1,6 @@
+/// Room management screen used to create, join, and monitor collaborative sessions.
+/// The UI keeps the user informed about participants, room state, and the peer
+/// connection lifecycle while the call is active.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/room_service.dart';
@@ -26,6 +29,8 @@ class _RoomScreenState extends State<RoomScreen> {
     _initRoomService();
   }
 
+  // Initializes the room service and binds it to the locally registered device so
+  // the screen can react to server-side room events in real time.
   Future<void> _initRoomService() async {
     final supabaseService = context.read<SupabaseService>();
     final deviceSerial = supabaseService.getDeviceSerial() ?? '';
@@ -62,6 +67,8 @@ class _RoomScreenState extends State<RoomScreen> {
     });
   }
 
+  // Creates a lobby room and publishes it to the signaling server so other peers
+  // can join using the generated code from the UI.
   Future<void> _createRoom() async {
     setState(() {
       _isLoading = true;
@@ -81,6 +88,8 @@ class _RoomScreenState extends State<RoomScreen> {
     }
   }
 
+  // Joins a pre-existing room by code and updates the state so the user can see
+  // the active participants list and move into the media call flow.
   Future<void> _joinRoom(String code) async {
     setState(() {
       _isLoading = true;
@@ -97,6 +106,8 @@ class _RoomScreenState extends State<RoomScreen> {
     }
   }
 
+  // Leaves the current room and resets the local UI so the user can create or join
+  // another session without stale participant data lingering in the screen state.
   Future<void> _leaveRoom() async {
     await _roomService.leaveRoom();
     setState(() {
@@ -106,6 +117,8 @@ class _RoomScreenState extends State<RoomScreen> {
     });
   }
 
+  // Opens the room-entry dialog that lets the user type a six-digit room code and
+  // immediately join the matching collaborative session.
   void _showJoinRoomDialog() {
     final codeController = TextEditingController();
     
@@ -141,6 +154,8 @@ class _RoomScreenState extends State<RoomScreen> {
     );
   }
 
+  // Starts the media path after a room is active, wiring the connection state to
+  // the WebRTC screen and allowing the user to continue directly into the call UI.
   void _startCall() {
     if (_currentRoomCode == null || _participants.isEmpty) return;
     

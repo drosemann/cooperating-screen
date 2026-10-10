@@ -1,8 +1,13 @@
+/// Room service for creating and joining collaborative sessions.
+/// The service abstracts the room API and keeps the rest of the app independent
+/// from the underlying transport details used to manage peer groups.
 import 'dart:async';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 
 class RoomInfo {
+  // Data transfer object for a room listing. It captures the identity of the host,
+  // current membership, and basic metadata used to render room cards in the UI.
   final String roomCode;
   final String roomName;
   final String host;
@@ -50,6 +55,8 @@ class RoomService {
     required String serverUrl,
   }) : _serverUrl = serverUrl;
 
+  /// Connects the client to the room signaling channel and pre-registers the current
+  /// device so the backend can later route room events and participant updates.
   Future<bool> connect(String deviceSerial) async {
     try {
       _deviceSerial = deviceSerial;
@@ -71,6 +78,8 @@ class RoomService {
     }
   }
 
+  /// Sends a room-specific signaling message with the active device identity baked
+  /// into the payload so the server can authorize action requests.
   void sendMessage(String messageType, Map<String, dynamic> data) {
     if (!_isConnected) {
       print('Error: Not connected to signaling server');
@@ -89,6 +98,8 @@ class RoomService {
     _channel.sink.add(jsonEncode(message));
   }
 
+  /// Subscribes to room-related server events and translates each incoming message
+  /// into either a state update or a callback that the UI can react to.
   void _listenToMessages() {
     _channel.stream.listen(
       (message) {
@@ -110,6 +121,8 @@ class RoomService {
     );
   }
 
+  /// Dispatches room lifecycle events like joins, leaves, and host changes into the
+  /// stream-based state model that the screens consume.
   void _handleMessage(Map<String, dynamic> message) {
     final type = message['type'];
     final data = message['data'];
@@ -186,6 +199,9 @@ class RoomService {
     onIceCandidateReceived?.call(data);
   }
 
+  /// Requests the server to create a new room using the current device as the host.
+  /// The room settings determine visibility, capacity, and how peers discover the
+  /// session after it is created.
   Future<bool> createRoom({
     String? roomName,
     int maxParticipants = 2,
@@ -202,6 +218,8 @@ class RoomService {
     return true;
   }
 
+  /// Joins a known room by code and sets the returned room as the active session
+  /// for the client.
   Future<bool> joinRoom(String roomCode) async {
     if (!_isConnected) return false;
 
@@ -212,6 +230,8 @@ class RoomService {
     return true;
   }
 
+  /// Leaves the active room cleanly and informs the server that this device should
+  /// no longer receive room-scoped signaling updates.
   Future<void> leaveRoom() async {
     if (!_isConnected || _currentRoomCode == null) return;
 
@@ -222,6 +242,8 @@ class RoomService {
     _currentRoomCode = null;
   }
 
+  /// Requests a snapshot of public rooms so the UI can list nearby or currently
+  /// available sessions to join without requiring manual coordination.
   Future<List<RoomInfo>> getPublicRooms() async {
     if (!_isConnected) return [];
 

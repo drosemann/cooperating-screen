@@ -1,3 +1,6 @@
+/// WebRTC call screen responsible for the active media session between peers.
+/// It manages the live stream experience, call controls, and the visual state of
+/// an in-progress audio or video exchange.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/webrtc_service.dart';
@@ -28,6 +31,8 @@ class _WebRTCCallScreenState extends State<WebRTCCallScreen> {
     _connectionState = context.read<ConnectionState>();
   }
 
+  // Confirms the call shutdown so the user has a final chance to cancel before the
+  // active WebRTC session is dismissed from the UI.
   void _endCall() {
     showDialog(
       context: context,
@@ -51,6 +56,8 @@ class _WebRTCCallScreenState extends State<WebRTCCallScreen> {
     );
   }
 
+  // Renders the live call interface, including the remote stream area, top status
+  // strip, and call controls that manage microphone, camera, and end-of-call actions.
   @override
   Widget build(BuildContext context) {
     return WillPopScope(

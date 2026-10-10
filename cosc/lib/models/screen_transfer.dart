@@ -1,3 +1,6 @@
+/// Screen-transfer model describing a completed remote-share session.
+/// It captures who sent content, how long the transfer lasted, and the amount of
+/// data moved so developers can reason about diagnostics and session history.
 class ScreenTransfer {
   final String id;
   final String fromDeviceId;

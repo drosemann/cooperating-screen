@@ -1,3 +1,6 @@
+/// Device model used across the app to describe a peer endpoint.
+/// It stores the serial number, display metadata, and activity timestamps that
+/// are used when searching for devices, pairing them, and rendering the UI.
 class Device {
   final String id;
   final String deviceSerial;

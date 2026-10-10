@@ -1,3 +1,6 @@
+/// Service that manages the WebRTC data channel used for lightweight signaling.
+/// It provides a message abstraction for text and binary payloads exchanged along
+/// the same connection used for media traffic and remote control events.
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'dart:typed_data';
 import 'dart:convert';

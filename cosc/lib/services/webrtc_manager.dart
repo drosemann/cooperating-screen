@@ -1,3 +1,6 @@
+/// Manager for active WebRTC peer connections and associated negotiation state.
+/// It coordinates stream setup, remote endpoints, and connection cleanup so a
+/// session can be created and torn down predictably.
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'webrtc_service.dart';
 import 'signaling_service.dart';

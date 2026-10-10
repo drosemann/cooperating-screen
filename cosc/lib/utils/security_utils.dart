@@ -1,3 +1,6 @@
+/// Security-focused helpers shared throughout the app.
+/// They centralize validation and protection logic so the codebase enforces the
+/// same trust checks whenever pairing, device registration, or remote access is used.
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'dart:math';

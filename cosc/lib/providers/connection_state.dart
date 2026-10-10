@@ -1,3 +1,6 @@
+/// Connection state notifier for the active WebRTC and signaling relationship.
+/// Screens subscribe to this provider to react to connectivity changes without
+/// manually passing callbacks through the widget tree.
 import 'package:flutter/material.dart';
 import '../services/webrtc_service.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';

@@ -1,3 +1,6 @@
+/// Pairing session data model for temporary device-linking handshakes.
+/// The session stores the two parties involved, the generated pairing code, and
+/// the expiry window used to reject stale or unauthorized attempts.
 class PairingSession {
   final String id;
   final String device1Id;

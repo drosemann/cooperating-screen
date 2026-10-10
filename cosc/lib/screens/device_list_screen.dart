@@ -1,3 +1,6 @@
+/// Device directory screen that lists known and active peers.
+/// It enables the user to browse paired devices, inspect their status, and start
+/// a new connection flow from a single entry point.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../utils/local_storage_service.dart';
@@ -12,6 +15,8 @@ class DeviceListScreen extends StatefulWidget {
 class _DeviceListScreenState extends State<DeviceListScreen> {
   late Future<List<PairedDevice>> _pairedDevices;
 
+  // Loads the device list when the screen appears so the user always sees the most
+  // recent pairing state from local storage.
   @override
   void initState() {
     super.initState();
@@ -24,6 +29,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     });
   }
 
+  // Removes a paired device after the user confirms their intent, then refreshes
+  // the list to keep the UI aligned with the persisted trust state.
   Future<void> _unpairDevice(PairedDevice device) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -55,6 +62,8 @@ class _DeviceListScreenState extends State<DeviceListScreen> {
     }
   }
 
+  // Renders the paired-device directory and surfaces the available actions: view
+  // status, unpair entries, or start a new pairing flow from the same screen.
   @override
   Widget build(BuildContext context) {
     return Scaffold(

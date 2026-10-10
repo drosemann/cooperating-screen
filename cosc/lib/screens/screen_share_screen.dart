@@ -1,3 +1,6 @@
+/// Screen-share session screen for streaming one device's display to another.
+/// It composes the media pipeline and runtime controls needed to start,
+/// monitor, and stop remote sharing from the current device.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/webrtc_service.dart';
@@ -30,6 +33,8 @@ class _ScreenShareScreenState extends State<ScreenShareScreen> {
     _connectionState = context.read<ConnectionState>();
   }
 
+  // Starts or stops the screen-capture workflow and updates the UI state so the
+  // user sees whether the current device is actively sharing its display.
   Future<void> _toggleScreenShare() async {
     if (_isScreenSharing) {
       final success = await ScreenCaptureService.stopScreenCapture();
@@ -54,6 +59,8 @@ class _ScreenShareScreenState extends State<ScreenShareScreen> {
     }
   }
 
+  // Confirms whether the user wants to terminate the current sharing session, as
+  // screen sharing is a long-lived operation that should be explicitly stopped.
   void _endScreenShare() {
     showDialog(
       context: context,

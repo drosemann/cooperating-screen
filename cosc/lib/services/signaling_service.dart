@@ -1,3 +1,6 @@
+/// Signaling service for WebSocket communication with the backend server.
+/// It handles connection lifecycle, message dispatch, and event conversion so the
+/// rest of the app can work with a clean application-level API.
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'dart:convert';
 
@@ -10,7 +13,9 @@ class SignalingService {
     required String serverUrl,
   }) : _serverUrl = serverUrl;
   
-  /// Connect to the signaling server
+  /// Opens the WebSocket connection to the signaling server and immediately sends
+  /// the device registration payload so the backend can map this client to a
+  /// reachable peer identity.
   Future<bool> connect(String deviceSerial) async {
     try {
       _channel = WebSocketChannel.connect(
@@ -32,7 +37,9 @@ class SignalingService {
     }
   }
   
-  /// Send a message through the signaling channel
+  /// Encodes a protocol message and forwards it through the active socket. The
+  /// payload consistently wraps each action in a `type`, `data`, and timestamp
+  /// envelope so the server can parse and route it reliably.
   void sendMessage(String messageType, Map<String, dynamic> data) {
     if (!_isConnected) {
       print('Error: Not connected to signaling server');
@@ -48,7 +55,9 @@ class SignalingService {
     _channel.sink.add(jsonEncode(message));
   }
   
-  /// Listen to incoming messages
+  /// Subscribes to the socket stream and dispatches each incoming payload to the
+  /// protocol-specific handler. Errors and disconnects are also logged to allow the
+  /// app to recover gracefully when the backend becomes unavailable.
   void _listenToMessages() {
     _channel.stream.listen(
       (message) {
@@ -70,7 +79,8 @@ class SignalingService {
     );
   }
   
-  /// Handle incoming signaling messages
+  /// Parses the server event and routes it to the matching WebRTC or room state
+  /// handler. This keeps the rest of the app decoupled from the raw socket format.
   void _handleMessage(Map<String, dynamic> message) {
     final type = message['type'];
     final data = message['data'];
@@ -122,7 +132,9 @@ class SignalingService {
     print('Connection state: ${data['state']}');
   }
   
-  /// Send pairing request
+  /// Sends a pairing challenge to the intended peer. The password is forwarded in
+  /// a transport-safe format so the backend can relay the request and the remote
+  /// device can confirm the intended match.
   void sendPairingRequest(String targetDeviceSerial, String password) {
     sendMessage('pairing_request', {
       'target_device': targetDeviceSerial,
@@ -130,7 +142,8 @@ class SignalingService {
     });
   }
   
-  /// Send WebRTC offer
+  /// Transmits a WebRTC offer to a target device so the negotiation can continue
+  /// without coupling the UI directly to the underlying signaling protocol.
   void sendOffer(String targetDevice, Map<String, dynamic> sdp) {
     sendMessage('offer', {
       'target_device': targetDevice,

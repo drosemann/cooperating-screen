@@ -1,3 +1,6 @@
+/// File-transfer service for moving documents and media between connected devices.
+/// It tracks progress, handles chunking, and exposes the status information
+/// needed by the UI while a transfer is running.
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:path/path.dart' as p;

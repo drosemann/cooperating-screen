@@ -1,3 +1,6 @@
+/// Settings screen exposing app personalization and connection preferences.
+/// It allows administrators to adjust visual appearance, networking, and device
+/// behavior without leaving the main application flow.
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/app_settings.dart';
@@ -16,11 +19,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadSettings();
   }
 
+  // Loads the persisted application settings when the screen is created so the
+  // controls reflect the latest video, audio, and theme preferences.
   Future<void> _loadSettings() async {
     final settings = context.read<AppSettings>();
     await settings.loadSettings();
   }
 
+  // Builds the settings screen and organizes the user preferences into grouped
+  // sections for display, connection, appearance, and notification behavior.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
