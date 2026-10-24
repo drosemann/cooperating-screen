@@ -118,4 +118,4 @@ Ist ein geiles Konzept für Pair Programming / Remote Support für meine geplant
 
 ### Lizenz
 
-GNU GPLv3 – siehe [LICENSE](LICENSE).
+Ab 24.10.2026 MIT – siehe [LICENSE](LICENSE). Ältere Stände bleiben GPLv3.
